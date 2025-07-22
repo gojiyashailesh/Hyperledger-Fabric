@@ -1,0 +1,15 @@
+OrdererOrgs:
+  - Name: Orderer 
+    Domain: orderer.com
+    EnableNodeOUs: true
+    Specs: 
+      - Hostname: orderer0
+PeerOrgs:
+  - Name: EveryCRED
+    Domain: org.everycred.com
+    EnableNodeOUs: true
+    Template: 
+      Count: 1
+    Users:
+      Count: 1
+

@@ -1,0 +1,19 @@
+.
+├── api
+├── bin
+├── ca
+├── chaincode
+├── channel-artifacts
+├── configtx
+├── cryptogen
+├── docker
+├── docker-compose.yaml
+├── docs
+├── filestructure.txt
+├── orderer
+├── peer
+├── README.md
+├── scripts
+└── setup
+
+13 directories, 3 files

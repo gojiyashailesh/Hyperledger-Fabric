@@ -1,0 +1,168 @@
+---
+Organizations:
+
+  - &OrdererOrg
+    Name: OrdererOrg
+    ID: OrdererMSP
+    MSPDir: ../cryptogen/solo/crypto-config/ordererOrganizations/orderer.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererMSP.admin')"
+
+  - &EveryCRED
+    Name: EveryCRED
+    ID: EveryCREDMSP
+    MSPDir: ../cryptogen/solo/crypto-config/peerOrganizations/org.everycred.com/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('EveryCREDMSP.admin', 'EveryCREDMSP.peer', 'EveryCREDMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('EveryCREDMSP.admin', 'EveryCREDMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('EveryCREDMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('EveryCREDMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.org.everycred.com
+        Port: 7051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_5: true
+  Orderer: &OrdererCapabilities
+    V2_5: true
+  Application: &ApplicationCapabilities
+    V2_5: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    LifecycleEndorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer0.orderer.com:7050
+    - orderer1.orderer.com:8050
+    - orderer2.orderer.com:9050
+  BatchTimeout: 2s
+  BatchSize:
+    MaxMessageCount: 10
+    AbsoluteMaxBytes: 99 MB
+    PreferredMaxBytes: 512 KB
+  EtcdRaft:
+    Consenters:
+      - Host: orderer0.orderer.com
+        Port: 7050
+        ClientTLSCert: ../cryptogen/solo/crypto-config/ordererOrganizations/orderer.com/orderers/orderer0.orderer.com/tls/server.crt
+        ServerTLSCert: ../cryptogen/solo/crypto-config/ordererOrganizations/orderer.com/orderers/orderer0.orderer.com/tls/server.crt
+      - Host: orderer1.orderer.com
+        Port: 8050
+        ClientTLSCert: ../cryptogen/solo/crypto-config/ordererOrganizations/orderer.com/orderers/orderer1.orderer.com/tls/server.crt
+        ServerTLSCert: ../cryptogen/solo/crypto-config/ordererOrganizations/orderer.com/orderers/orderer1.orderer.com/tls/server.crt
+      - Host: orderer2.orderer.com
+        Port: 9050
+        ClientTLSCert: ../cryptogen/solo/crypto-config/ordererOrganizations/orderer.com/orderers/orderer2.orderer.com/tls/server.crt
+        ServerTLSCert: ../cryptogen/solo/crypto-config/ordererOrganizations/orderer.com/orderers/orderer2.orderer.com/tls/server.crt
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+  Capabilities:
+    <<: *OrdererCapabilities
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+
+  EveryCREDGenesis:
+    <<: *ChannelDefaults
+    Policies:
+      Readers:
+        Type: ImplicitMeta
+        Rule: "ANY Readers"
+      Writers:
+        Type: ImplicitMeta
+        Rule: "ANY Writers"
+      Admins:
+        Type: ImplicitMeta
+        Rule: "MAJORITY Admins"
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+    Consortiums:
+      EveryCREDConsortium:
+        Organizations:
+          - *EveryCRED
+    Capabilities:
+      <<: *ChannelCapabilities
+
+  EveryCREDChannel:
+    <<: *ChannelDefaults
+    Policies:
+      Readers:
+        Type: ImplicitMeta
+        Rule: "ANY Readers"
+      Writers:
+        Type: ImplicitMeta
+        Rule: "ANY Writers"
+      Admins:
+        Type: ImplicitMeta
+        Rule: "MAJORITY Admins"
+    Consortium: EveryCREDConsortium
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *EveryCRED
+      Capabilities:
+        <<: *ApplicationCapabilities
